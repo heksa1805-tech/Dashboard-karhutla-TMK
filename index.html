@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dashboard Monitoring Karhutla | PT Telaga Mas Kalimantan</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--green:#174b36;--green2:#246a4a;--mint:#e8f3ec;--bg:#f3f6f4;--ink:#1d2c25;--muted:#65756c;--line:#dfe7e1;--orange:#e68a2e;--red:#d94b45;--blue:#427bb8}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,Arial,sans-serif}
+header{background:linear-gradient(120deg,#123a2b,#246a4a);color:white;padding:26px max(22px,calc((100% - 1440px)/2));}
+.topline{display:flex;justify-content:space-between;gap:16px;align-items:center;flex-wrap:wrap}.brand{display:flex;align-items:center;gap:13px}.logo{width:48px;height:48px;border:1px solid #ffffff66;border-radius:12px;display:grid;place-items:center;font-weight:800;font-size:15px;background:#ffffff14}.eyebrow{font-size:11px;letter-spacing:1.6px;text-transform:uppercase;color:#c5e2d0;font-weight:700}h1{font-size:clamp(22px,3vw,32px);margin:5px 0 6px;letter-spacing:-.8px}.subtitle{color:#d7e9de;font-size:13px}.status{font-size:12px;padding:9px 12px;border-radius:20px;border:1px solid #ffffff55;background:#ffffff12}
+main{max-width:1440px;margin:auto;padding:22px}.toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:18px}.toolbar label,.btn,.select{font-size:12px}.btn{border:0;border-radius:9px;padding:11px 14px;font-weight:700;cursor:pointer;background:var(--green);color:white}.btn.secondary{background:white;color:var(--green);border:1px solid var(--line)}.btn:hover{filter:brightness(1.07)}.file-label{display:inline-flex;align-items:center;gap:8px}.file-label input{max-width:220px}.filter{padding:10px 12px;border:1px solid var(--line);border-radius:9px;background:white;color:var(--ink)}
+.note{background:#fff8e9;border:1px solid #f2dfb8;color:#75551f;border-radius:10px;padding:12px 14px;font-size:12px;line-height:1.5;margin-bottom:18px}
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:16px}.card{background:white;border:1px solid var(--line);border-radius:14px;padding:17px;box-shadow:0 3px 12px #173d2b08;min-width:0}.kpi-head{display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-size:12px;font-weight:600}.kpi-icon{width:33px;height:33px;display:grid;place-items:center;border-radius:10px;background:var(--mint);font-size:17px}.kpi-value{font-size:29px;font-weight:800;letter-spacing:-1px;margin:12px 0 4px}.kpi-foot{font-size:11px;color:var(--muted)}.red{color:var(--red)}.orange{color:var(--orange)}.green{color:var(--green2)}
+.grid2{display:grid;grid-template-columns:1.35fr 1fr;gap:16px;margin-bottom:16px}.gridmap{display:grid;grid-template-columns:1.4fr 1fr;gap:16px;margin-bottom:16px}.section-title{font-size:14px;font-weight:800;margin:0 0 4px}.section-sub{font-size:11px;color:var(--muted);margin-bottom:15px}.chart-wrap{height:265px;position:relative}.map-wrap{height:340px;border-radius:10px;overflow:hidden;border:1px solid var(--line)}#map{height:100%;width:100%}.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:11px;color:var(--muted);margin-top:12px}.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px}
+.table-head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}.table-scroll{overflow:auto}table{border-collapse:collapse;width:100%;font-size:12px;white-space:nowrap}th{text-align:left;background:#f5f8f6;color:#627268;font-size:10px;text-transform:uppercase;letter-spacing:.5px;padding:12px;border-bottom:1px solid var(--line)}td{padding:12px;border-bottom:1px solid #edf1ee}tr:hover td{background:#fafcfb}.pill{padding:5px 8px;border-radius:20px;font-size:10px;font-weight:700;display:inline-block}.pill.high{background:#fde9e7;color:#b93832}.pill.med{background:#fff0db;color:#965a13}.pill.low{background:#e5f4e9;color:#247345}.empty{text-align:center;color:var(--muted);padding:25px}.foot{font-size:10px;color:#829087;text-align:center;padding:22px}
+@media(max-width:900px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.grid2,.gridmap{grid-template-columns:1fr}.chart-wrap{height:240px}}
+@media(max-width:520px){main{padding:13px}.kpis{gap:9px}.card{padding:13px}.kpi-value{font-size:24px}.logo{width:40px;height:40px}}
+</style>
+</head>
+<body>
+<header><div class="topline"><div class="brand"><div class="logo">TMK</div><div><div class="eyebrow">Forest Protection & Fire Management</div><h1>Dashboard Monitoring Karhutla</h1><div class="subtitle">PT Telaga Mas Kalimantan · Monitoring hotspot, patroli, kejadian dan penanganan</div></div></div><div class="status" id="updatedLabel">● Dashboard siap digunakan</div></div></header>
+<main>
+<div class="toolbar">
+<label class="file-label btn" for="excelFile">⬆ Import Excel (.xlsx/.xls/.csv)<input id="excelFile" type="file" accept=".xlsx,.xls,.csv" hidden></label>
+<button class="btn secondary" id="downloadCsv">⬇ Unduh data CSV</button>
+<button class="btn secondary" id="resetData">Kembali ke contoh</button>
+<select class="filter" id="monthFilter" aria-label="Filter bulan"><option value="all">Semua bulan</option></select>
+<select class="filter" id="statusFilter" aria-label="Filter status"><option value="all">Semua status</option><option>Baru</option><option>Dalam Penanganan</option><option>Selesai</option></select>
+</div>
+<div class="note"><b>Catatan data:</b> dashboard ini berisi data simulasi untuk demonstrasi, bukan laporan kejadian aktual TMK. Import file Excel Anda untuk mengganti data. Peta menggunakan koordinat pada file; pastikan koordinat dan informasi lokasi telah diverifikasi sebelum digunakan untuk keputusan operasional.</div>
+<section class="kpis">
+<div class="card"><div class="kpi-head">Total Hotspot <span class="kpi-icon">◎</span></div><div class="kpi-value" id="kpiHotspot">—</div><div class="kpi-foot">Jumlah titik dalam data terfilter</div></div>
+<div class="card"><div class="kpi-head">Luas Terbakar (ha) <span class="kpi-icon">♨</span></div><div class="kpi-value red" id="kpiArea">—</div><div class="kpi-foot">Akumulasi luas kejadian terlapor</div></div>
+<div class="card"><div class="kpi-head">Kejadian Selesai <span class="kpi-icon">✓</span></div><div class="kpi-value green" id="kpiDone">—</div><div class="kpi-foot" id="kpiDoneFoot">—</div></div>
+<div class="card"><div class="kpi-head">Patroli Terlaksana <span class="kpi-icon">⌖</span></div><div class="kpi-value orange" id="kpiPatrol">—</div><div class="kpi-foot">Persentase rata-rata realisasi patroli</div></div>
+</section>
+<section class="grid2">
+<div class="card"><h2 class="section-title">Tren Hotspot Bulanan</h2><div class="section-sub">Jumlah titik hotspot berdasarkan bulan kejadian</div><div class="chart-wrap"><canvas id="trendChart"></canvas></div></div>
+<div class="card"><h2 class="section-title">Status Penanganan</h2><div class="section-sub">Komposisi status seluruh kejadian terfilter</div><div class="chart-wrap"><canvas id="statusChart"></canvas></div></div>
+</section>
+<section class="gridmap">
+<div class="card"><h2 class="section-title">Peta Hotspot & Kejadian</h2><div class="section-sub">Pilih marker untuk melihat ringkasan kejadian. Peta dasar memerlukan koneksi internet.</div><div class="map-wrap"><div id="map"></div></div><div class="legend"><span><i class="dot" style="background:#d94b45"></i>Tinggi</span><span><i class="dot" style="background:#e68a2e"></i>Sedang</span><span><i class="dot" style="background:#2c925a"></i>Rendah</span></div></div>
+<div class="card"><h2 class="section-title">Ringkasan Tindak Lanjut</h2><div class="section-sub">Prioritas penanganan dari data yang sedang ditampilkan</div><div id="actionsSummary"></div></div>
+</section>
+<section class="card">
+<div class="table-head"><div><h2 class="section-title">Tabel Monitoring Kejadian</h2><div class="section-sub" style="margin:5px 0 0">Data terfilter; gunakan template Excel agar kolom terbaca benar.</div></div><input class="filter" id="searchInput" placeholder="Cari lokasi / blok / status…" aria-label="Cari data"></div>
+<div class="table-scroll"><table><thead><tr><th>Tanggal</th><th>ID</th><th>Lokasi / Blok</th><th>Latitude</th><th>Longitude</th><th>Hotspot</th><th>Luas (ha)</th><th>Risiko</th><th>Status</th><th>Patroli (%)</th><th>PIC</th></tr></thead><tbody id="tableBody"></tbody></table></div>
+<div id="rowCount" class="section-sub" style="margin:12px 0 0"></div>
+</section>
+<div class="foot">PT Telaga Mas Kalimantan · Dashboard statis berbasis GitHub Pages · Data contoh wajib diganti dengan data tervalidasi.</div>
+</main>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+const sampleData = [
+{Tanggal:"2026-06-03",ID:"TMK-001",Lokasi:"Blok A-12",Latitude:-1.25,Longitude:116.15,Hotspot:4,Luas_ha:2.5,Risiko:"Tinggi",Status:"Dalam Penanganan",Patroli_pct:80,PIC:"Regu 1"},
+{Tanggal:"2026-06-11",ID:"TMK-002",Lokasi:"Blok B-04",Latitude:-1.31,Longitude:116.28,Hotspot:2,Luas_ha:0.8,Risiko:"Sedang",Status:"Selesai",Patroli_pct:100,PIC:"Regu 2"},
+{Tanggal:"2026-07-02",ID:"TMK-003",Lokasi:"Blok C-08",Latitude:-1.18,Longitude:116.34,Hotspot:6,Luas_ha:8.2,Risiko:"Tinggi",Status:"Baru",Patroli_pct:50,PIC:"Regu 1"},
+{Tanggal:"2026-07-14",ID:"TMK-004",Lokasi:"Blok D-02",Latitude:-1.42,Longitude:116.09,Hotspot:1,Luas_ha:0.2,Risiko:"Rendah",Status:"Selesai",Patroli_pct:100,PIC:"Regu 3"},
+{Tanggal:"2026-08-06",ID:"TMK-005",Lokasi:"Blok A-09",Latitude:-1.29,Longitude:116.42,Hotspot:8,Luas_ha:15.4,Risiko:"Tinggi",Status:"Dalam Penanganan",Patroli_pct:65,PIC:"Regu 2"},
+{Tanggal:"2026-08-18",ID:"TMK-006",Lokasi:"Blok E-11",Latitude:-1.08,Longitude:116.22,Hotspot:3,Luas_ha:1.6,Risiko:"Sedang",Status:"Selesai",Patroli_pct:90,PIC:"Regu 4"},
+{Tanggal:"2026-09-01",ID:"TMK-007",Lokasi:"Blok F-03",Latitude:-1.37,Longitude:116.37,Hotspot:5,Luas_ha:4.1,Risiko:"Sedang",Status:"Baru",Patroli_pct:40,PIC:"Regu 1"},
+{Tanggal:"2026-09-17",ID:"TMK-008",Lokasi:"Blok B-15",Latitude:-1.16,Longitude:116.05,Hotspot:2,Luas_ha:0.4,Risiko:"Rendah",Status:"Selesai",Patroli_pct:100,PIC:"Regu 3"}
+];
+let data = sampleData.map(x=>({...x})), trendChart, statusChart, map, markers=[];
+const monthNames=["Jan","Feb","Mar","Apr","Mei","Jun","Jul","Agu","Sep","Okt","Nov","Des"];
+function normRow(r){const get=(...keys)=>{for(const k of keys){if(r[k]!==undefined&&r[k]!==null&&r[k]!=="")return r[k]}return ""};
+return {Tanggal:dateString(get("Tanggal","tanggal","Date","date")),ID:String(get("ID","Id","id","Kode","kode")||"TMK-"+Math.random().toString(36).slice(2,7)),Lokasi:String(get("Lokasi","lokasi","Blok","blok","Location")||"Tidak diisi"),Latitude:num(get("Latitude","latitude","Lat","lat")),Longitude:num(get("Longitude","longitude","Lon","lon","Long","long")),Hotspot:num(get("Hotspot","hotspot","Jumlah_Hotspot","jumlah_hotspot")),Luas_ha:num(get("Luas_ha","Luas (ha)","Luas","luas_ha","area_ha")),Risiko:String(get("Risiko","risiko","Risk")||"Sedang"),Status:String(get("Status","status")||"Baru"),Patroli_pct:num(get("Patroli_pct","Patroli (%)","Patroli","patroli_pct")),PIC:String(get("PIC","Pic","pic")||"-")}}
+function num(v){if(typeof v==="string")v=v.replace(",",".");const n=Number(v);return Number.isFinite(n)?n:0}
+function dateString(v){if(v instanceof Date)return v.toISOString().slice(0,10);if(typeof v==="number"&&v>20000){const d=XLSX.SSF.parse_date_code(v);return `${d.y}-${String(d.m).padStart(2,"0")}-${String(d.d).padStart(2,"0")}`}return String(v||"").slice(0,10)}
+function filtered(){const m=document.getElementById("monthFilter").value,s=document.getElementById("statusFilter").value,q=document.getElementById("searchInput").value.toLowerCase();return data.filter(d=>(m==="all"||Number(String(d.Tanggal).slice(5,7))===Number(m))&&(s==="all"||d.Status===s)&&JSON.stringify(d).toLowerCase().includes(q))}
+function initMap(){map=L.map('map').setView([-1.25,116.23],9);L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:18,attribution:'&copy; OpenStreetMap'}).addTo(map)}
+function markerColor(r){return r==="Tinggi"?"#d94b45":r==="Sedang"?"#e68a2e":"#2c925a"}
+function update(){
+ const rows=filtered();const total=rows.reduce((a,d)=>a+d.Hotspot,0),area=rows.reduce((a,d)=>a+d.Luas_ha,0),done=rows.filter(d=>d.Status==="Selesai").length,patrol=rows.length?rows.reduce((a,d)=>a+d.Patroli_pct,0)/rows.length:0;
+ document.getElementById("kpiHotspot").textContent=total.toLocaleString("id-ID");document.getElementById("kpiArea").textContent=area.toLocaleString("id-ID",{maximumFractionDigits:1});document.getElementById("kpiDone").textContent=done;document.getElementById("kpiDoneFoot").textContent=`${rows.length?Math.round(done/rows.length*100):0}% dari ${rows.length} kejadian`;document.getElementById("kpiPatrol").textContent=Math.round(patrol)+"%";
+ const months=Array.from({length:12},(_,i)=>i+1);const trend=months.map(m=>rows.filter(d=>Number(String(d.Tanggal).slice(5,7))===m).reduce((a,d)=>a+d.Hotspot,0));
+ if(trendChart)trendChart.destroy();trendChart=new Chart(document.getElementById("trendChart"),{type:"bar",data:{labels:monthNames,datasets:[{label:"Hotspot",data:trend,backgroundColor:"#2b8055",borderRadius:5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{precision:0}},x:{grid:{display:false}}}}});
+ const sts=["Baru","Dalam Penanganan","Selesai"];if(statusChart)statusChart.destroy();statusChart=new Chart(document.getElementById("statusChart"),{type:"doughnut",data:{labels:sts,datasets:[{data:sts.map(s=>rows.filter(d=>d.Status===s).length),backgroundColor:["#d94b45","#e68a2e","#2c925a"],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,cutout:"65%",plugins:{legend:{position:"bottom"}}}});
+ markers.forEach(m=>map.removeLayer(m));markers=[];rows.filter(d=>d.Latitude&&d.Longitude).forEach(d=>{const marker=L.circleMarker([d.Latitude,d.Longitude],{radius:8,color:"#fff",weight:2,fillColor:markerColor(d.Risiko),fillOpacity:.95}).bindPopup(`<b>${esc(d.ID)} · ${esc(d.Lokasi)}</b><br>Tanggal: ${esc(d.Tanggal)}<br>Hotspot: ${d.Hotspot}<br>Luas: ${d.Luas_ha} ha<br>Risiko: ${esc(d.Risiko)}<br>Status: ${esc(d.Status)}<br>PIC: ${esc(d.PIC)}`).addTo(map);markers.push(marker)});
+ document.getElementById("tableBody").innerHTML=rows.map(d=>`<tr><td>${esc(d.Tanggal)}</td><td><b>${esc(d.ID)}</b></td><td>${esc(d.Lokasi)}</td><td>${d.Latitude||"—"}</td><td>${d.Longitude||"—"}</td><td>${d.Hotspot}</td><td>${d.Luas_ha}</td><td><span class="pill ${d.Risiko==="Tinggi"?"high":d.Risiko==="Sedang"?"med":"low"}">${esc(d.Risiko)}</span></td><td>${esc(d.Status)}</td><td>${d.Patroli_pct}%</td><td>${esc(d.PIC)}</td></tr>`).join("")||'<tr><td colspan="11" class="empty">Tidak ada data sesuai filter.</td></tr>';
+ document.getElementById("rowCount").textContent=`Menampilkan ${rows.length} dari ${data.length} baris`;
+ const newCount=rows.filter(d=>d.Status==="Baru").length, ongoing=rows.filter(d=>d.Status==="Dalam Penanganan").length, high=rows.filter(d=>d.Risiko==="Tinggi").length;
+ document.getElementById("actionsSummary").innerHTML=`<div style="display:flex;justify-content:space-between;padding:13px 0;border-bottom:1px solid var(--line)"><span>Prioritas risiko tinggi</span><b class="red">${high} titik</b></div><div style="display:flex;justify-content:space-between;padding:13px 0;border-bottom:1px solid var(--line)"><span>Belum ditindaklanjuti</span><b class="red">${newCount} kejadian</b></div><div style="display:flex;justify-content:space-between;padding:13px 0;border-bottom:1px solid var(--line)"><span>Dalam penanganan</span><b class="orange">${ongoing} kejadian</b></div><p style="font-size:11px;line-height:1.6;color:var(--muted);margin-top:15px">Gunakan ringkasan ini sebagai alat bantu pemantauan. Validasi lapangan dan prosedur tanggap darurat tetap menjadi acuan utama.</p>`;
+}
+function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function refreshMonth(){const sel=document.getElementById("monthFilter"),old=sel.value;sel.innerHTML='<option value="all">Semua bulan</option>';[...new Set(data.map(d=>String(d.Tanggal).slice(5,7)).filter(m=>/^\d\d$/.test(m)))].sort().forEach(m=>{const o=document.createElement("option");o.value=String(Number(m));o.textContent=monthNames[Number(m)-1]||m;sel.appendChild(o)});if([...sel.options].some(o=>o.value===old))sel.value=old}
+document.getElementById("excelFile").addEventListener("change",async e=>{const f=e.target.files[0];if(!f)return;try{const buf=await f.arrayBuffer();let rows;if(f.name.toLowerCase().endsWith(".csv")){const wb=XLSX.read(new TextDecoder().decode(buf),{type:"string"});rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:""})}else{const wb=XLSX.read(buf,{type:"array",cellDates:true});rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:""})}data=rows.map(normRow).filter(r=>r.Tanggal||r.ID||r.Lokasi);refreshMonth();update();document.getElementById("updatedLabel").textContent="● Data diimpor: "+f.name;alert("Berhasil memuat "+data.length+" baris. Pastikan nama kolom mengikuti template Excel.");}catch(err){alert("File tidak dapat dibaca. Gunakan template Excel yang disediakan.");console.error(err)}e.target.value=""});
+document.getElementById("downloadCsv").addEventListener("click",()=>{const rows=filtered();const header=["Tanggal","ID","Lokasi","Latitude","Longitude","Hotspot","Luas_ha","Risiko","Status","Patroli_pct","PIC"];const csv=[header.join(","),...rows.map(r=>header.map(k=>'"'+String(r[k]??"").replace(/"/g,'""')+'"').join(","))].join("\r\n");const a=document.createElement("a");a.href=URL.createObjectURL(new Blob(["\ufeff"+csv],{type:"text/csv;charset=utf-8"}));a.download="monitoring_karhutla_tmk.csv";a.click();URL.revokeObjectURL(a.href)});
+document.getElementById("resetData").addEventListener("click",()=>{data=sampleData.map(x=>({...x}));document.getElementById("searchInput").value="";document.getElementById("statusFilter").value="all";refreshMonth();document.getElementById("monthFilter").value="all";update();document.getElementById("updatedLabel").textContent="● Data contoh dimuat"});
+["monthFilter","statusFilter","searchInput"].forEach(id=>document.getElementById(id).addEventListener(id==="searchInput"?"input":"change",update));
+initMap();refreshMonth();update();
+</script>
+</body>
+</html>
