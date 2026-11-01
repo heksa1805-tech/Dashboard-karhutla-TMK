@@ -96,7 +96,7 @@ document.getElementById("resetData").addEventListener("click",()=>{data=sampleDa
 ["monthFilter","statusFilter","searchInput"].forEach(id=>document.getElementById(id).addEventListener(id==="searchInput"?"input":"change",update));
 async function loadGeoJSON() {
   try {
-    const response = await fetch('./Data/wilayah_tmk.geojson');
+    const response = await fetch('./data/pt_tmk.geojson');
 
     if (!response.ok) {
       throw new Error('File tidak ditemukan: ' + response.status);
