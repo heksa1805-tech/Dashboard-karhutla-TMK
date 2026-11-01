@@ -94,7 +94,39 @@ document.getElementById("excelFile").addEventListener("change",async e=>{const f
 document.getElementById("downloadCsv").addEventListener("click",()=>{const rows=filtered();const header=["Tanggal","ID","Lokasi","Latitude","Longitude","Hotspot","Luas_ha","Risiko","Status","Patroli_pct","PIC"];const csv=[header.join(","),...rows.map(r=>header.map(k=>'"'+String(r[k]??"").replace(/"/g,'""')+'"').join(","))].join("\r\n");const a=document.createElement("a");a.href=URL.createObjectURL(new Blob(["\ufeff"+csv],{type:"text/csv;charset=utf-8"}));a.download="monitoring_karhutla_tmk.csv";a.click();URL.revokeObjectURL(a.href)});
 document.getElementById("resetData").addEventListener("click",()=>{data=sampleData.map(x=>({...x}));document.getElementById("searchInput").value="";document.getElementById("statusFilter").value="all";refreshMonth();document.getElementById("monthFilter").value="all";update();document.getElementById("updatedLabel").textContent="● Data contoh dimuat"});
 ["monthFilter","statusFilter","searchInput"].forEach(id=>document.getElementById(id).addEventListener(id==="searchInput"?"input":"change",update));
-initMap();refreshMonth();update();
+async function loadGeoJSON() {
+  try {
+    const response = await fetch('./Data/wilayah_tmk.geojson');
+
+    if (!response.ok) {
+      throw new Error('File tidak ditemukan: ' + response.status);
+    }
+
+    const geojson = await response.json();
+
+    const layer = L.geoJSON(geojson, {
+      style: {
+        color: '#ff7800',
+        weight: 2,
+        fillColor: '#f7b267',
+        fillOpacity: 0.25
+      }
+    }).addTo(map);
+
+    if (layer.getBounds().isValid()) {
+      map.fitBounds(layer.getBounds());
+    }
+
+    console.log('GeoJSON berhasil dimuat');
+  } catch (error) {
+    console.error('Gagal memuat GeoJSON:', error);
+  }
+}
+ initMap();refreshMonth();update();
 </script>
 </body>
 </html>
+initMap();
+loadGeoJSON();
+refreshMonth();
+update();
