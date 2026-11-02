@@ -9,7 +9,7 @@ from shapely.geometry import Point
 
 ROOT = Path(__file__).resolve().parents[1]
 DATA = ROOT / "data"
-PBPH_FILE = DATA / "pbph.geojson"
+PBPH_FILE = DATA / "pt_tmk.geojson"
 HISTORY_FILE = DATA / "hotspot_history.csv"
 OUTPUT_GEOJSON = DATA / "hotspot.geojson"
 OUTPUT_CSV = DATA / "hotspot.csv"
